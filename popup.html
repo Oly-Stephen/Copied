@@ -13,24 +13,27 @@
       <label><input type="checkbox" id="jsCheck"> JavaScript</label>
     </div>
     <button id="scrapeButton">Scrape Current Page</button>
-    <div id="output">
-      <div class="section html-section">
-        <h2>HTML</h2>
+    <div class="tabs">
+      <div class="tab-buttons">
+        <button class="tab-button active" data-tab="html">HTML</button>
+        <button class="tab-button" data-tab="css">CSS</button>
+        <button class="tab-button" data-tab="js">JavaScript</button>
+      </div>
+      <div class="tab-content active" id="htmlTab">
         <textarea id="htmlOutput" readonly></textarea>
-        <button id="copyHtmlBtn" class="copy-btn">Copy HTML</button>
+        <button class="copy-btn" data-target="htmlOutput">Copy HTML</button>
       </div>
-      <div class="section css-section">
-        <h2>CSS</h2>
+      <div class="tab-content" id="cssTab">
         <textarea id="cssOutput" readonly></textarea>
-        <button id="copyCssBtn" class="copy-btn">Copy CSS</button>
+        <button class="copy-btn" data-target="cssOutput">Copy CSS</button>
       </div>
-      <div class="section js-section">
-        <h2>JavaScript</h2>
+      <div class="tab-content" id="jsTab">
         <textarea id="jsOutput" readonly></textarea>
-        <button id="copyJsBtn" class="copy-btn">Copy JavaScript</button>
+        <button class="copy-btn" data-target="jsOutput">Copy JavaScript</button>
       </div>
     </div>
   </div>
+  <div id="toast" class="toast">Copied to clipboard!</div>
   <script src="popup.js"></script>
 </body>
 </html>

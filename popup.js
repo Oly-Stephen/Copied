@@ -1,37 +1,32 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Get all elements
     const scrapeButton = document.getElementById('scrapeButton');
     const htmlOutput = document.getElementById('htmlOutput');
     const cssOutput = document.getElementById('cssOutput');
     const jsOutput = document.getElementById('jsOutput');
-    const copyHtmlBtn = document.getElementById('copyHtmlBtn');
-    const copyCssBtn = document.getElementById('copyCssBtn');
-    const copyJsBtn = document.getElementById('copyJsBtn');
-    
-    // Checkboxes
     const htmlCheck = document.getElementById('htmlCheck');
     const cssCheck = document.getElementById('cssCheck');
     const jsCheck = document.getElementById('jsCheck');
+    const toast = document.getElementById('toast');
 
-    // Sections
-    const htmlSection = document.querySelector('.html-section');
-    const cssSection = document.querySelector('.css-section');
-    const jsSection = document.querySelector('.js-section');
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
 
-    // Toggle section visibility based on checkboxes
-    function updateSections() {
-        htmlSection.classList.toggle('hidden', !htmlCheck.checked);
-        cssSection.classList.toggle('hidden', !cssCheck.checked);
-        jsSection.classList.toggle('hidden', !jsCheck.checked);
-    }
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
 
-    // Add listeners to checkboxes
-    [htmlCheck, cssCheck, jsCheck].forEach(checkbox => {
-        checkbox.addEventListener('change', updateSections);
+            // Add active class to clicked button and corresponding content
+            button.classList.add('active');
+            const tabId = `${button.dataset.tab}Tab`;
+            document.getElementById(tabId).classList.add('active');
+        });
     });
 
-    // Initial section visibility
-    updateSections();
-
+    // Scrape button functionality
     scrapeButton.addEventListener('click', async function() {
         try {
             const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
@@ -40,13 +35,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('No active tab found');
             }
 
-            // Inject the content script
             await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 function: scrapeContent
             });
 
-            // Get the scraped content based on selected options
             const response = await chrome.tabs.sendMessage(tab.id, {
                 action: "scrape",
                 options: {
@@ -76,21 +69,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Copy buttons
-    copyHtmlBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(htmlOutput.value)
-            .catch(err => console.error('Failed to copy HTML:', err));
+    // Copy button functionality
+    document.querySelectorAll('.copy-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.dataset.target;
+            const textarea = document.getElementById(targetId);
+            navigator.clipboard.writeText(textarea.value)
+                .then(() => {
+                    showToast();
+                })
+                .catch(err => console.error('Failed to copy:', err));
+        });
     });
 
-    copyCssBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(cssOutput.value)
-            .catch(err => console.error('Failed to copy CSS:', err));
-    });
-
-    copyJsBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(jsOutput.value)
-            .catch(err => console.error('Failed to copy JavaScript:', err));
-    });
+    // Toast functionality
+    function showToast() {
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
 });
 
 function scrapeContent() {
