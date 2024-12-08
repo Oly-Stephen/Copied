@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Web Page Scraper</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Web Page Scraper</h1>
+    <div class="options">
+      <label><input type="checkbox" id="htmlCheck" checked> HTML</label>
+      <label><input type="checkbox" id="cssCheck" checked> CSS</label>
+      <label><input type="checkbox" id="jsCheck"> JavaScript</label>
+    </div>
+    <button id="scrapeButton">Scrape Current Page</button>
+    <div id="output">
+      <div class="section html-section">
+        <h2>HTML</h2>
+        <textarea id="htmlOutput" readonly></textarea>
+        <button id="copyHtmlBtn" class="copy-btn">Copy HTML</button>
+      </div>
+      <div class="section css-section">
+        <h2>CSS</h2>
+        <textarea id="cssOutput" readonly></textarea>
+        <button id="copyCssBtn" class="copy-btn">Copy CSS</button>
+      </div>
+      <div class="section js-section">
+        <h2>JavaScript</h2>
+        <textarea id="jsOutput" readonly></textarea>
+        <button id="copyJsBtn" class="copy-btn">Copy JavaScript</button>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
