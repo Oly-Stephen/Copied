@@ -82,6 +82,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Preview button functionality
+    document.querySelectorAll('.preview-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.dataset.target;
+            const textarea = document.getElementById(targetId);
+            const type = targetId.replace('Output', '').toLowerCase();
+            previewContent(textarea.value, type);
+        });
+    });
+
     // Toast functionality
     function showToast() {
         toast.classList.add('show');
@@ -184,4 +194,157 @@ function scrapeContent() {
         }
         return true;
     });
+}
+
+function previewContent(content, type) {
+    // Create a blob URL for the content
+    const getPreviewHTML = () => {
+        switch (type) {
+            case 'html':
+                return `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>HTML Preview</title>
+                        <style>
+                            /* CSS Reset */
+                            *, *::before, *::after { box-sizing: border-box; }
+                            body { margin: 0; line-height: 1.5; }
+                        </style>
+                    </head>
+                    <body>
+                        ${content}
+                        <script>
+                            // Make external links work in preview
+                            document.querySelectorAll('a').forEach(link => {
+                                if (link.href) {
+                                    link.target = '_blank';
+                                }
+                            });
+                        </script>
+                    </body>
+                    </html>
+                `;
+            case 'css':
+                return `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>CSS Preview</title>
+                        <style>${content}</style>
+                    </head>
+                    <body>
+                        <div class="preview-container">
+                            <h1>CSS Preview</h1>
+                            <div class="demo-elements">
+                                <h2>Heading Level 2</h2>
+                                <h3>Heading Level 3</h3>
+                                <p>This is a paragraph with <strong>bold</strong> and <em>italic</em> text.</p>
+                                <div class="button-container">
+                                    <button>Button 1</button>
+                                    <button>Button 2</button>
+                                </div>
+                                <ul>
+                                    <li>List Item 1</li>
+                                    <li>List Item 2</li>
+                                    <li>List Item 3</li>
+                                </ul>
+                                <form>
+                                    <input type="text" placeholder="Text input">
+                                    <input type="checkbox" id="check"><label for="check">Checkbox</label>
+                                    <select>
+                                        <option>Select Option 1</option>
+                                        <option>Select Option 2</option>
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                `;
+            case 'js':
+                return `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>JavaScript Preview</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            #console { 
+                                background: #f5f5f5; 
+                                padding: 15px; 
+                                border-radius: 5px;
+                                margin: 10px 0;
+                                min-height: 100px;
+                                max-height: 300px;
+                                overflow-y: auto;
+                            }
+                            .error { color: #ff0000; }
+                            .log { color: #333; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>JavaScript Preview</h1>
+                        <div id="console"></div>
+                        <script>
+                            const consoleDiv = document.getElementById('console');
+                            const originalConsole = { ...console };
+                            
+                            function logToElement(type, ...args) {
+                                const line = document.createElement('div');
+                                line.className = type;
+                                line.textContent = args.map(arg => 
+                                    typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+                                ).join(' ');
+                                consoleDiv.appendChild(line);
+                                originalConsole[type](...args);
+                            }
+
+                            console.log = (...args) => logToElement('log', ...args);
+                            console.error = (...args) => logToElement('error', ...args);
+                            console.warn = (...args) => logToElement('warn', ...args);
+
+                            try {
+                                ${content}
+                            } catch (error) {
+                                console.error('Error:', error.message);
+                            }
+                        </script>
+                    </body>
+                    </html>
+                `;
+        }
+    };
+
+    // Create blob URL
+    const blob = new Blob([getPreviewHTML()], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Open preview in a new window with specific dimensions
+    const width = 1024;
+    const height = 768;
+    const left = (screen.width - width) / 2;
+    const top = (screen.height - height) / 2;
+
+    const previewWindow = window.open(
+        blobUrl,
+        '_blank',
+        `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`
+    );
+
+    if (!previewWindow) {
+        alert('Pop-up blocked! Please allow pop-ups for this site.');
+        return;
+    }
+
+    // Clean up the blob URL when the window is closed
+    previewWindow.onbeforeunload = () => {
+        URL.revokeObjectURL(blobUrl);
+    };
 }
